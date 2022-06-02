@@ -53,6 +53,28 @@ public class CSVFilterTest {
     }
 
     @Test
+    public void should_auto_generate_schema_with_expand_column_name() {
+        HashMap<String, String> config = new HashMap<>();
+        config.put(CSVFilter.PARSER_SEPARATOR_CONFIG, ";");
+        config.put(CSVFilter.PARSER_IGNORE_QUOTATIONS_CONFIG, "false");
+        config.put(CSVFilter.PARSER_IGNORE_LEADING_WHITESPACE_CONFIG, "true");
+        config.put(CSVFilter.PARSER_QUOTE_CHAR_CONFIG, "\"");
+        config.put(CSVFilter.PARSER_STRICT_QUOTES_CHAR_CONFIG, "true");
+        config.put("trimColumn", "true");
+        config.put("extractColumnName", "headers");
+
+        filter.configure(config, alias -> null);
+        RecordsIterable<TypedStruct> output = filter.apply(null, DEFAULT_STRUCT, false);
+        Assert.assertNotNull(output);
+        Assert.assertEquals(1, output.size());
+
+        final TypedStruct record = output.iterator().next();
+        Assert.assertEquals("value1", record.getString("col1"));
+        Assert.assertEquals("2", record.getString("col2"));
+        Assert.assertEquals("true", record.getString("col3"));
+    }
+
+    @Test
     public void should_auto_generate_schema_given_no_schema_field() {
         filter.configure(configs, alias -> null);
         RecordsIterable<TypedStruct> output = filter.apply(null, DEFAULT_STRUCT, false);
